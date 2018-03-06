@@ -1,0 +1,45 @@
+module Z3
+
+using PyCall
+
+# Load z3 Python library
+const z3 = PyNULL()
+
+function __init__()
+    copy!(z3, pyimport_conda("z3", "z3"))
+end
+
+export z3, Z3Real, Z3Int, Z3Bool, Z3Model,
+add_cvar!,add_ivar!,add_bvar!,
+
+
+Z3Real(name::String) = z3[:Real](name)
+Z3Int(name::String) = z3[:Int](name)
+Z3Bool(name::String) = z3[:Bool](name)
+
+struct Z3Model
+  ptr::PyObject
+  numvars::Int
+  varvalue::Vector{Float64}
+  varlower::Vector{Float64}
+  varupper::Vector{Float64}
+  vartype::Vector{Symbol}
+  varptr::Vector{PyObject}
+  varname::Vector{String}
+
+  Z3Model() = new(z3[:Solver](), 0, Float64[],Float64[],Float64[],Symbol[],PyObject[],String[])
+end
+
+function add_var!(model::Z3Model,vartype::Symbol,lb::Real=-Inf, ub::Real=Inf)
+  model.numvars += 1
+  numvars = model.numvars
+  push!(model.varvalue,NaN)
+  push!(model.varlower,lb)
+  push!(model.varupper,ub)
+  push!(model.vartype,vartype)
+  if vartype == :Cont
+    varname = "x$numvars"
+    var = Z3Real(varname)
+  elseif vartype == :Int
+    varname = "x$numvars"
+    var = Z3Real(varname)

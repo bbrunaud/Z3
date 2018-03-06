@@ -1,0 +1,3 @@
+using Z3
+
+x = Z3Real("x")
